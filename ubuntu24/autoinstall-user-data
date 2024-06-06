@@ -1,0 +1,287 @@
+#cloud-config
+autoinstall:
+  version: 1
+  shutdown: poweroff
+  # make network config visible in installer
+  interactive-sections:
+    - network
+    - apt
+    - proxy
+  user-data:
+    timezone: Europe/Zurich
+  package_update: false
+  package_upgrade: false
+  apt:
+    preserve_sources_list: false
+    primary:
+      - arches: [default]
+        uri: "http://ubuntu-master.mirror.tudos.de/ubuntu"
+    disable_components: []
+  codecs:
+    install: false
+  drivers:
+    install: false
+  identity:
+    hostname: ubuntu24
+    username: install
+    password: RANDOM
+  keyboard:
+    layout: us
+    toggle: null
+    variant: ''
+  locale: en_US.UTF-8
+  network:
+    ethernets:
+      enp1s0:
+        dhcp4: true
+    version: 2
+  # proxy: http://proxy.domain.tld:8080
+  ssh:
+    allow-pw: true
+    authorized-keys: []
+    install-server: true
+  packages:
+    - wget
+    - vim
+    - ufw
+    - open-vm-tools
+    - cron
+    - less
+    - parted
+    - freeipa-client
+    - rsyslog
+    - man
+  source:
+    id: ubuntu-server-minimal
+    search_drivers: false
+  late-commands:
+    - |
+      # HARDEN ALL MOUNT POINTS AS NEEDED FOR CIS L1
+      sed -i 's#/home .*#/home ext4 nodev 0 1#' /target/etc/fstab
+      sed -i 's#/tmp .*#/tmp ext4 nodev,noexec,nosuid 0 1#' /target/etc/fstab
+      # GRUB TIMEOUT
+      sed -i 's#GRUB_TIMEOUT_STYLE=.*#GRUB_TIMEOUT_STYLE=menu#' /target/etc/default/grub
+      sed -i 's#GRUB_TIMEOUT=.*#GRUB_TIMEOUT=10#' /target/etc/default/grub
+      # allow normal boot without grub password
+      sed 's/ --class os/ --class os --unrestricted/' -i /target/etc/grub.d/10_linux
+      # PROTECT GRUB EDIT WITH PASSWORD
+      cat << EOF >> /target/etc/grub.d/40_custom
+      set superusers="root"
+      password_pbkdf2 root grub.pbkdf2.sha512.10000.D29AAB6E48619643B6F23646584A311341185669771C5081D8C46A4B0DA7222543A33CDB31BEF97F7E3C9C4A90FDE37E6541C52739F6F3BDB767BEB86BC4AA12.431AF7B5EE5B4D12BAFCDDD89122A1D39C0BC0F8B7E385591BE0CFB38FEA03A6F7DD3ED53EDECF7E3C2B76289DAFA97F522B5E9DE6D19F6DE37C7A003A00B146
+      export superusers
+      EOF
+    - curtin in-target --target=/target -- update-grub
+      # enable ufw, allow ssh
+    - curtin in-target --target=/target -- sudo ufw enable
+    - curtin in-target --target=/target -- sudo ufw allow ssh
+    - curtin in-target --target=/target -- passwd -q -u root
+    - curtin in-target --target=/target -- passwd -q -x -1 root
+    - curtin in-target --target=/target -- usermod --password '$6$tYAF/G1BmyvmYBjh$8js789dn3OSYny/nMvlriAF3BdP2OTbxtScmm9RqEXdsJ1Lbb0hhoKm1o8NzJALlCsynx9YyKXhbOcsXHWm2z0' root
+      # remove install user
+    - curtin in-target --target=/target -- userdel -r install || true
+      # finalize
+    - curtin in-target --target=/target -- cloud-init clean --logs
+    - curtin in-target --target=/target -- touch /etc/cloud/cloud-init.disabled
+    - curtin in-target --target=/target -- apt-get -y remove unattended-upgrades
+    - curtin in-target --target=/target -- apt-get clean all
+  storage:
+    config:
+    - ptable: gpt
+      path: /dev/sda
+      wipe: superblock-recursive
+      preserve: false
+      name: ''
+      grub_device: false
+      type: disk
+      id: disk0
+    - device: disk0
+      size: 1127219200
+      wipe: superblock
+      flag: boot
+      number: 1
+      preserve: false
+      grub_device: true
+      offset: 1048576
+      type: partition
+      id: partition-0
+    - fstype: fat32
+      volume: partition-0
+      preserve: false
+      type: format
+      id: format-0
+    - device: disk0
+      size: 2147483648
+      wipe: superblock
+      number: 2
+      preserve: false
+      grub_device: false
+      offset: 1128267776
+      type: partition
+      id: partition-1
+    - fstype: ext4
+      volume: partition-1
+      preserve: false
+      type: format
+      id: format-1
+    - device: disk0
+      size: 39672872960
+      wipe: superblock
+      number: 3
+      preserve: false
+      grub_device: false
+      offset: 3275751424
+      type: partition
+      id: partition-2
+    - name: vg0
+      devices:
+      - partition-2
+      preserve: false
+      type: lvm_volgroup
+      id: lvm_volgroup-0
+    - name: root
+      volgroup: lvm_volgroup-0
+      size: 19834863616B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/root
+      type: lvm_partition
+      id: lvm_partition-0
+    - fstype: ext4
+      volume: lvm_partition-0
+      preserve: false
+      type: format
+      id: format-2
+    - path: /
+      device: format-2
+      type: mount
+      id: mount-2
+    - path: /boot
+      device: format-1
+      type: mount
+      id: mount-1
+    - path: /boot/efi
+      device: format-0
+      type: mount
+      id: mount-0
+    - name: home
+      volgroup: lvm_volgroup-0
+      size: 2147483648B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/home
+      type: lvm_partition
+      id: lvm_partition-1
+    - fstype: ext4
+      volume: lvm_partition-1
+      preserve: false
+      type: format
+      id: format-3
+    - path: /home
+      device: format-3
+      type: mount
+      id: mount-3
+    - name: tmp
+      volgroup: lvm_volgroup-0
+      size: 1073741824B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/tmp
+      type: lvm_partition
+      id: lvm_partition-2
+    - fstype: ext4
+      volume: lvm_partition-2
+      preserve: false
+      type: format
+      id: format-4
+    - path: /tmp
+      device: format-4
+      type: mount
+      id: mount-4
+    - name: vartmp
+      volgroup: lvm_volgroup-0
+      size: 1073741824B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/vartmp
+      type: lvm_partition
+      id: lvm_partition-3
+    - fstype: ext4
+      volume: lvm_partition-3
+      preserve: false
+      type: format
+      id: format-5
+    - name: var
+      volgroup: lvm_volgroup-0
+      size: 2147483648B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/var
+      type: lvm_partition
+      id: lvm_partition-4
+    - fstype: ext4
+      volume: lvm_partition-4
+      preserve: false
+      type: format
+      id: format-6
+    - path: /var
+      device: format-6
+      type: mount
+      id: mount-6
+    - name: varlog
+      volgroup: lvm_volgroup-0
+      size: 2147483648B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/varlog
+      type: lvm_partition
+      id: lvm_partition-5
+    - fstype: ext4
+      volume: lvm_partition-5
+      preserve: false
+      type: format
+      id: format-7
+    - path: /var/log
+      device: format-7
+      type: mount
+      id: mount-7
+    - name: varlogaudit
+      volgroup: lvm_volgroup-0
+      size: 536870912B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/varlogaudit
+      type: lvm_partition
+      id: lvm_partition-6
+    - fstype: ext4
+      volume: lvm_partition-6
+      preserve: false
+      type: format
+      id: format-8
+    - path: /var/log/audit
+      device: format-8
+      type: mount
+      id: mount-8
+    - name: swap
+      volgroup: lvm_volgroup-0
+      size: 2147483648B
+      wipe: superblock
+      preserve: false
+      path: /dev/vg0/swap
+      type: lvm_partition
+      id: lvm_partition-7
+    - fstype: swap
+      volume: lvm_partition-7
+      preserve: false
+      type: format
+      id: format-9
+    - path: ''
+      device: format-9
+      type: mount
+      id: mount-9
+    - path: /var/tmp
+      device: format-5
+      type: mount
+      id: mount-5
+    swap:
+      size: 0
+
