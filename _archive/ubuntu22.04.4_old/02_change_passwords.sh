@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-test -f env.sh || echo ERROR: env.sh is missing
-test -f env.sh || exit 1
-source env.sh
+BASEDIR="/srv/iso.remaster/ubuntu22"
+AUTOINSTALL="$BASEDIR/autoinstall-user-data"
+WORK_DIR="$BASEDIR/build"
 
 echo "INFO: Set Grub password in autoinstall"
 read -sp "Enter Grub Password: " grub_pw

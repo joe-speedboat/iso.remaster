@@ -1,10 +1,9 @@
 #!/bin/bash
 
-DATE=$(date +%Y%m%d%H%M)
-MENU_TITLE="RHEL Linux 9.4 - Custom v$DATE"
-PROJ_NAME="INSTALL CIS L1 RHEL 9 OS"
-BASE_DIR=/srv/iso.remaster/rhel9
-DST_ISO="$BASE_DIR/remastered-custom_rhel9-$DATE.iso"
+test -f env.sh || echo ERROR: env.sh is missing
+test -f env.sh || exit 1
+source env.sh
+
 
 cd $BASE_DIR || (echo BASE_DIR=$BASE_DIR not found ; exit 1)
 test -f $BASE_DIR/inject/ks-custom_rhel9.cfg || ( echo kickstart not found ; exit 1)

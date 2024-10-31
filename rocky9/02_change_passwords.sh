@@ -1,6 +1,8 @@
 #!/bin/bash
 
-BASE_DIR=/srv/iso.remaster/rocky9
+test -f env.sh || echo ERROR: env.sh is missing
+test -f env.sh || exit 1
+source env.sh
 
 RC=0
 test -f $BASE_DIR/inject/ks-custom_rocky9.cfg || ( echo "error kickstart not found" ; exit 1 )

@@ -1,8 +1,10 @@
 #!/bin/bash
+
+test -f env.sh || echo ERROR: env.sh is missing
+test -f env.sh || exit 1
+source env.sh
+
 set -e
-
-BASE_DIR=/srv/iso.remaster/rocky9
-
 cd $BASE_DIR/ || (echo project dir not found ; exit 1)
 
 umount -fl $BASE_DIR/iso-mount/ || true

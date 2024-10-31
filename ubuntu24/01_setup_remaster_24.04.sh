@@ -1,19 +1,12 @@
 #!/bin/bash
 # https://www.pugetsystems.com/labs/hpc/ubuntu-22-04-server-autoinstall-iso/
 
-# PREREQ RPMS, REMASTERING TESTED WITH ROCKY9
-# dnf install p7zip p7zip-plugins wget xorriso
-
-BASEDIR="/srv/iso.remaster/ubuntu24"
-AUTOINSTALL="$BASEDIR/autoinstall-user-data"
-ISO_SRC="$BASEDIR/ubuntu-24.04-live-server-amd64.iso"
-ISO_DST="$BASEDIR/ubuntu-24.04-autoinstall-amd64.iso"
-WORK_DIR="$BASEDIR/build"
-MENU_TITLE="INSTALL Ubuntu 24.04 LTS AUTO"
-
+test -f env.sh || echo ERROR: env.sh is missing
+test -f env.sh || exit 1
+source env.sh
 
 echo "DOWNLOAD ISO IF NEEDED"
-test -f $ISO_SRC || curl https://releases.ubuntu.com/noble/$(basename $ISO_SRC) --output $ISO_SRC || exit 1
+test -f $ISO_SRC || curl "$ISO_URL" --output $ISO_SRC || exit 1
 
 ISO_NAME="$(file $ISO_SRC | cut -d\' -f2)"
 test -d "$WORK_DIR" 

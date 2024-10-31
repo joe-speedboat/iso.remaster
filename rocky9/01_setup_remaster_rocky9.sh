@@ -1,11 +1,10 @@
 #!/bin/bash
+
+test -f env.sh || echo ERROR: env.sh is missing
+test -f env.sh || exit 1
+source env.sh
+
 set -e
-
-BASE_DIR=/srv/iso.remaster/rocky9
-# ISO_FILE=Rocky-9.4-x86_64-minimal.iso
-ISO_FILE=Rocky-9.4-x86_64-dvd.iso
-ISO_URL="https://mirror.puzzle.ch/rockylinux/9/isos/x86_64/$ISO_FILE"
-
 echo "Check prereq"
 cd $BASE_DIR || (echo BASE_DIR=$BASE_DIR not found ; exit 1)
 test -f $BASE_DIR/inject/ks-custom_rocky9.cfg || ( echo error: kickstart not found ; exit 1)

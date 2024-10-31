@@ -26,7 +26,7 @@ autoinstall:
     username: install
     password: RANDOM
   keyboard:
-    layout: ch
+    layout: us
     toggle: null
     variant: ''
   locale: en_US.UTF-8
@@ -67,24 +67,8 @@ autoinstall:
       # PROTECT GRUB EDIT WITH PASSWORD
       cat << EOF >> /target/etc/grub.d/40_custom
       set superusers="root"
-      password_pbkdf2 root grub.pbkdf2.sha512.10000.E346EFC21565FEFB60E76CFD4369C9D91BE70FEFF88ABE123E065E3AC04AAFA0518A2F9332BB96D93EF8113181869E15A0D0A7FC961DBA72AED849E79129D8C7.9E372B8F38AE660266A0174EC6C038F0E90075E80048FB0528FC847FC6C77C8F358C739B64661129139F8A5FB29C4284FB13F23E66EB77849A7EC4239CF4B7C4
+      password_pbkdf2 root grub.pbkdf2.sha512.10000.5E1D2F66463E09D96EA56A037A1316448418B03E287E3C92600FDF93E30CAE6C54BDA673FA6BD0A9A383EB43BEE44B627EFC0A7564AFC255F2D5E78CAE0AF41C.72FB899E3E524C15E424ECA10E9D70BD77F41621CD186BF8C7660CE68679C8D8F44558C7059BEBF44C56F840AE6FC0B3BA8FBDC9BBECD280EBEB2609B320B8F2
       export superusers
-      EOF
-      cat << EOF >> /target/root/.sysprep.sh
-      echo DO NOT RUN, IT WILL NEUTRALIZE VM, PRESS 3x ENTER IF YOU REALLY KNOW WHAT YOU DO
-      read x 
-      read x 
-      read x
-      find /var/log -type f -delete
-      rm -rf /etc/ssh/ssh_host_*
-      rm -f /home/*/.bash_history
-      rm -f /root/.bash_history
-      rm -f /home/*/{.ssh,.local,.config}
-      rm -f /root/{.ssh,.local,.config}
-      rm -rf /tmp/*
-      rm -rf /var/tmp/*
-      sed -i "/localhost/!d" /etc/hosts
-      apt clean
       EOF
     - curtin in-target --target=/target -- update-grub
       # enable ufw, allow ssh
@@ -92,7 +76,7 @@ autoinstall:
     - curtin in-target --target=/target -- sudo ufw allow ssh
     - curtin in-target --target=/target -- passwd -q -u root
     - curtin in-target --target=/target -- passwd -q -x -1 root
-    - curtin in-target --target=/target -- usermod --password '$6$Z/3ev5y2S32N5Ws/$zyGEg4FNfHT2z.jIVVuOP0M0zDty0QLmCBKZdIGh.pr0AydLzOxNxe3z3YNSSJVi3IcaPNdNn0cfHJjL3ChuM0' root
+    - curtin in-target --target=/target -- usermod --password '$6$Evme3jBlZc4iTCZp$XqKBUJCsNaU2EdP8F1QhyfyBP59ljRZelzCmXJ0NApy7mEStc1qZXVI8nLbQbNZ9QZ8TOi9FC4oQpUqj8lbx7.' root
       # remove install user
     - curtin in-target --target=/target -- userdel -r install || true
       # finalize
