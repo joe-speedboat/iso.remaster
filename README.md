@@ -51,6 +51,20 @@ This repository contains scripts and configurations for remastering various oper
   - Run sysprep script from [joe-speedboat](https://raw.githubusercontent.com/joe-speedboat/linux.scripts/master/shell/sysprep.sh).
     - you now can use /root/.sysprep.sh within system, which is a short form of universal sysprep.sh, stripped down to clean-up the system
 
+### Rocky Linux 10
+* **Build Host:** Rocky Linux 10
+* **ISO Version:** Rocky Linux 10.0
+* **Scripts:**
+  - `env.sh`: All vars to rebuild the iso have movied into this file
+  - `00_requirements.sh`: Install necessary packages on the build host.
+  - `01_setup_remaster_rocky10.sh`: Download and prepare the ISO.
+  - `02_change_passwords.sh`: Change passwords for root and GRUB.
+  - `03_remaster.sh`: Build the remastered ISO.
+  - `99_cleanup.sh`: Cleanup script for git checking, backup, etc.
+* **Post-Setup:**
+  - Run sysprep script from [joe-speedboat](https://raw.githubusercontent.com/joe-speedboat/linux.scripts/master/shell/sysprep.sh).
+    - you now can use /root/.sysprep.sh within system, which is a short form of universal sysprep.sh, stripped down to clean-up the system
+
 ### RHEL 9
 * **Build Host:** Rocky Linux 9
 * **ISO Version:** RHEL 9.4
@@ -58,6 +72,20 @@ This repository contains scripts and configurations for remastering various oper
   - `env.sh`: All vars to rebuild the iso have movied into this file
   - `00_requirements.sh`: Install necessary packages on the build host.
   - `01_setup_remaster_rhel9.sh`: Download and prepare the ISO.
+  - `02_change_passwords.sh`: Change passwords for root and GRUB.
+  - `03_remaster.sh`: Build the remastered ISO.
+  - `99_cleanup.sh`: Cleanup script for git checking, backup, etc.
+* **Post-Setup:**
+  - Run sysprep script from [joe-speedboat](https://raw.githubusercontent.com/joe-speedboat/linux.scripts/master/shell/sysprep.sh).
+    - you now can use /root/.sysprep.sh within system, which is a short form of universal sysprep.sh, stripped down to clean-up the system
+
+### RHEL 10
+* **Build Host:** Rocky Linux 10
+* **ISO Version:** RHEL 10.0
+* **Scripts:**
+  - `env.sh`: All vars to rebuild the iso have movied into this file
+  - `00_requirements.sh`: Install necessary packages on the build host.
+  - `01_setup_remaster_rhel10.sh`: Download and prepare the ISO.
   - `02_change_passwords.sh`: Change passwords for root and GRUB.
   - `03_remaster.sh`: Build the remastered ISO.
   - `99_cleanup.sh`: Cleanup script for git checking, backup, etc.
